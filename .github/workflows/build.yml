@@ -1,0 +1,91 @@
+name: Build Super Secure Overlay DEX
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.2'
+
+      # Build APK Release (Menggunakan 'gradle' sistem agar lebih aman jika wrapper tidak ada)
+      - name: Build Release APK
+        working-directory: ./overlay-dex
+        run: |
+          if [ -f "./gradlew" ]; then
+            chmod +x gradlew
+            ./gradlew assembleRelease
+          else
+            gradle assembleRelease
+          fi
+
+      # Ekstrak DEX yang sudah terobfuscate dari APK
+      - name: Extract Obfuscated DEX
+        run: |
+          mkdir -p output_artifact
+          
+          # Cari APK hasil build
+          APK_PATH=$(find overlay-dex/app/build/outputs/apk/release -name "*.apk" | head -n 1)
+          
+          if [ -z "$APK_PATH" ]; then
+            echo "Error: APK tidak ditemukan!"
+            exit 1
+          fi
+          
+          # Gunakan unzip untuk mengambil classes.dex dari dalam APK
+          unzip -p "$APK_PATH" classes.dex > output_artifact/classes2.dex
+          
+          # Copy file pendukung
+          cp overlay-dex/smali/inject.smali output_artifact/inject.smali
+          cp overlay-dex/smali/README.md output_artifact/README.md
+
+      # Pack dan Obfuscate Assets
+      - name: Pack and Obfuscate Assets
+        run: |
+          python3 -c "
+          import os, zipfile, io
+          
+          key = 0x5B # KUNCI RAHASIA
+          hero_dir = 'heroes'
+          out_dir = 'output_artifact'
+          out_file = os.path.join(out_dir, 'heroes.bin')
+          
+          if os.path.exists(hero_dir):
+              zip_buffer = io.BytesIO()
+              with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+                  for f in os.listdir(hero_dir):
+                      if f.endswith('.png') or f.endswith('.webp'):
+                          zf.write(os.path.join(hero_dir, f), arcname=f)
+              
+              data = bytearray(zip_buffer.getvalue())
+              for i in range(len(data)):
+                  data[i] ^= key
+                  
+              with open(out_file, 'wb') as outf:
+                  outf.write(data)
+              print('Berhasil membungkus dan Obfuscate PNG menjadi heroes.bin!')
+          else:
+              print('WARNING: Folder heroes tidak ditemukan!')
+          "
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: super-secure-dex-${{ github.run_number }}
+          path: output_artifact/
