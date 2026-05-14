@@ -14,7 +14,7 @@ public class SHMManager {
     public boolean connect() {
         try {
             // Baca FD dari file yang dibuat Native
-            File fdFile = new File("/data/data/com.google.android.ext/cache/shm_fd");
+            File fdFile = new File("/data/user/0/com.waxmoon.ma.gp/rootfs/data/user/0/com.mobile.legends/files/shm_fd/shm_fd");
             if (!fdFile.exists()) return false;
 
             Scanner sc = new Scanner(fdFile);
