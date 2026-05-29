@@ -14,7 +14,6 @@ import java.util.concurrent.Executors;
 public class NativeSender {
     private static final ExecutorService socketExecutor = Executors.newSingleThreadExecutor();
 
-    // Helper anti-bypass: Pastikan C++ menerima nilai FALSE/0 jika fitur terkunci
     private static boolean isFeatureEnabled(SharedPreferences prefs, String prefKey) {
         String featureKey = FeatureManager.mapKeyToFeature(prefKey);
         if (FeatureManager.isFeatureLocked(prefs, featureKey)) return false;
@@ -31,11 +30,10 @@ public class NativeSender {
                 ByteBuffer bb = ByteBuffer.allocate(136);
                 bb.order(ByteOrder.LITTLE_ENDIAN);
                 
-                bb.putInt(0x4D4C4242); // MAGIC "MLBB"
+                bb.putInt(0x4D4C4242); 
                 long expirySeconds = authManager.getExpiryTimestamp();
                 bb.putLong(expirySeconds * 1000); 
 
-                // PROTEKSI VIP COMBO & LING
                 boolean lingLocked = FeatureManager.isFeatureLocked(prefs, "ling");
                 int lingMode = lingLocked ? 0 : prefs.getInt("ling_mode", 0);
                 int lingManual = (lingMode == 1) ? 1 : 0;
@@ -51,7 +49,6 @@ public class NativeSender {
                 else if (selectedCombo.contains("xavier")) activeCombo = 5;
                 else if (selectedCombo.contains("selena")) activeCombo = 6;
 
-                // MENGGUNAKAN isFeatureEnabled UNTUK MENCEGAH BYPASS
                 bb.putInt(isFeatureEnabled(prefs, "aimbot_enable") ? 1 : 0);
                 bb.putInt(lingManual);
                 bb.putInt(lingAuto);

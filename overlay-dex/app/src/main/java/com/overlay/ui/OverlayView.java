@@ -35,6 +35,9 @@ import com.overlay.models.RoomPlayerData;
 import com.overlay.service.NativeSender;
 import com.overlay.ui.tabs.*;
 
+import java.io.DataInputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,8 +67,8 @@ public class OverlayView extends LinearLayout {
     public OverlayView(Context ctx, WindowManager wm, WindowManager.LayoutParams lp, RadarView radar) {
         super(ctx);
         this.context = ctx;
-        this.wm    = wm;
-        this.lp    = lp;
+        this.wm = wm;
+        this.lp = lp;
         this.radar = radar;
         this.prefs = ctx.getSharedPreferences("mod_settings", Context.MODE_PRIVATE);
         this.authManager = new KeyAuthManager(ctx);
@@ -103,18 +106,18 @@ public class OverlayView extends LinearLayout {
                 int newW = Math.round(w * scale);
                 int newH = Math.round(h * scale);
                 Bitmap scaled = Bitmap.createScaledBitmap(bmp, newW, newH, true);
-                
+
                 Bitmap circle = Bitmap.createBitmap(pillSize, pillSize, Bitmap.Config.ARGB_8888);
                 Canvas canvas = new Canvas(circle);
                 Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                
+
                 canvas.drawCircle(pillSize / 2f, pillSize / 2f, pillSize / 2f, paint);
                 paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-                
+
                 int left = (pillSize - newW) / 2;
                 int top = (pillSize - newH) / 2;
                 canvas.drawBitmap(scaled, left, top, paint);
-                
+
                 BitmapDrawable bd = new BitmapDrawable(ctx.getResources(), circle);
                 bd.setGravity(Gravity.CENTER);
                 tvPill.setBackground(bd);
@@ -138,17 +141,16 @@ public class OverlayView extends LinearLayout {
 
         LayoutParams pillLp = new LayoutParams(UIFactory.dp(ctx, 44), UIFactory.dp(ctx, 44));
         tvPill.setLayoutParams(pillLp);
-
         addView(tvPill);
     }
 
     private void buildPanel(Context ctx) {
         panel = new LinearLayout(ctx);
         panel.setOrientation(VERTICAL);
-        
+
         LayoutParams panelLp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         panel.setLayoutParams(panelLp);
-        panel.setMinimumWidth(UIFactory.dp(ctx, 340)); 
+        panel.setMinimumWidth(UIFactory.dp(ctx, 340));
 
         try {
             Bitmap bmp = BitmapFactory.decodeStream(ctx.getAssets().open("background.jpg"));
@@ -157,7 +159,7 @@ public class OverlayView extends LinearLayout {
                 Canvas canvas = new Canvas(overlay);
                 canvas.drawBitmap(bmp, 0, 0, null);
                 canvas.drawColor(Color.argb(200, 0, 0, 0));
-                
+
                 BitmapDrawable bd = new BitmapDrawable(ctx.getResources(), overlay);
                 panel.setBackground(bd);
             } else {
@@ -207,12 +209,16 @@ public class OverlayView extends LinearLayout {
         TextView t1 = new TextView(ctx);
         t1.setText("MONDEV");
         t1.setLetterSpacing(0.1f);
-        t1.setTextColor(UIFactory.C_TEXT); t1.setTextSize(18f); t1.setTypeface(Typeface.create("sans-serif-black", Typeface.BOLD));
+        t1.setTextColor(UIFactory.C_TEXT);
+        t1.setTextSize(18f);
+        t1.setTypeface(Typeface.create("sans-serif-black", Typeface.BOLD));
         titleRow.addView(t1);
 
         TextView tBeta = new TextView(ctx);
         tBeta.setText(" beta");
-        tBeta.setTextColor(UIFactory.C_ACCENT); tBeta.setTextSize(10f); tBeta.setTypeface(Typeface.create("sans-serif-light", Typeface.ITALIC));
+        tBeta.setTextColor(UIFactory.C_ACCENT);
+        tBeta.setTextSize(10f);
+        tBeta.setTypeface(Typeface.create("sans-serif-light", Typeface.ITALIC));
         tBeta.setPadding(UIFactory.dp(ctx, 4), 0, 0, UIFactory.dp(ctx, 2));
         titleRow.addView(tBeta);
 
@@ -223,7 +229,8 @@ public class OverlayView extends LinearLayout {
 
         TextView t2 = new TextView(ctx);
         t2.setText("Subscription: " + timeStr);
-        t2.setTextColor(UIFactory.C_ACCENT); t2.setTextSize(10f);
+        t2.setTextColor(UIFactory.C_ACCENT);
+        t2.setTextSize(10f);
         t2.setAlpha(0.8f);
         col.addView(t2);
         h.addView(col);
@@ -265,7 +272,7 @@ public class OverlayView extends LinearLayout {
             final int idx = i;
             tabBtns[i] = new TextView(ctx);
             tabBtns[i].setText(labels[i]);
-            tabBtns[i].setTextSize(10f); 
+            tabBtns[i].setTextSize(10f);
             tabBtns[i].setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD));
             tabBtns[i].setLetterSpacing(0.08f);
             tabBtns[i].setPadding(UIFactory.dp(ctx, 16), UIFactory.dp(ctx, 8), UIFactory.dp(ctx, 16), UIFactory.dp(ctx, 8));
@@ -291,11 +298,11 @@ public class OverlayView extends LinearLayout {
             else tbg.setStroke(UIFactory.dp(context, 1), Color.argb(20, 255, 255, 255));
             tabBtns[i].setBackground(tbg);
         }
-        if (tabDash   != null) tabDash.setVisibility(idx == 0 ? VISIBLE : GONE);
+        if (tabDash != null) tabDash.setVisibility(idx == 0 ? VISIBLE : GONE);
         if (tabVisual != null) tabVisual.setVisibility(idx == 1 ? VISIBLE : GONE);
-        if (tabRad    != null) tabRad.setVisibility(idx == 2 ? VISIBLE : GONE);
+        if (tabRad != null) tabRad.setVisibility(idx == 2 ? VISIBLE : GONE);
         if (tabCombat != null) tabCombat.setVisibility(idx == 3 ? VISIBLE : GONE);
-        if (tabRoom   != null) tabRoom.setVisibility(idx == 4 ? VISIBLE : GONE);
+        if (tabRoom != null) tabRoom.setVisibility(idx == 4 ? VISIBLE : GONE);
     }
 
     private View buildContent(Context ctx) {
@@ -308,10 +315,10 @@ public class OverlayView extends LinearLayout {
         roomTableContainer = new LinearLayout(ctx);
         roomTableContainer.setOrientation(VERTICAL);
 
-        tabDash   = TabDashboard.build(ctx, prefs, authManager, radar, realScreenW, realScreenH, this::refreshAllUI, () -> applyUIScale(prefs.getFloat("ui_scale", 1.0f)));
-        tabRad    = TabRadar.build(ctx, prefs, authManager, radar, realScreenW, realScreenH);
+        tabDash = TabDashboard.build(ctx, prefs, authManager, radar, realScreenW, realScreenH, this::refreshAllUI, () -> applyUIScale(prefs.getFloat("ui_scale", 1.0f)));
+        tabRad = TabRadar.build(ctx, prefs, authManager, radar, realScreenW, realScreenH);
         tabCombat = TabCombat.build(ctx, prefs, authManager, radar, realScreenW, realScreenH, this::showModernDialog);
-        tabRoom   = TabRoom.build(ctx, prefs, authManager, radar, realScreenW, realScreenH, roomTableContainer);
+        tabRoom = TabRoom.build(ctx, prefs, authManager, radar, realScreenW, realScreenH, roomTableContainer);
         tabVisual = TabVisual.build(ctx, prefs, authManager, radar, realScreenW, realScreenH);
 
         FrameLayout.LayoutParams flp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
@@ -353,11 +360,11 @@ public class OverlayView extends LinearLayout {
 
         frame.removeAllViews();
         Context ctx = getContext();
-        
-        tabDash   = TabDashboard.build(ctx, prefs, authManager, radar, realScreenW, realScreenH, this::refreshAllUI, () -> applyUIScale(prefs.getFloat("ui_scale", 1.0f)));
-        tabRad    = TabRadar.build(ctx, prefs, authManager, radar, realScreenW, realScreenH);
+
+        tabDash = TabDashboard.build(ctx, prefs, authManager, radar, realScreenW, realScreenH, this::refreshAllUI, () -> applyUIScale(prefs.getFloat("ui_scale", 1.0f)));
+        tabRad = TabRadar.build(ctx, prefs, authManager, radar, realScreenW, realScreenH);
         tabCombat = TabCombat.build(ctx, prefs, authManager, radar, realScreenW, realScreenH, this::showModernDialog);
-        tabRoom   = TabRoom.build(ctx, prefs, authManager, radar, realScreenW, realScreenH, roomTableContainer);
+        tabRoom = TabRoom.build(ctx, prefs, authManager, radar, realScreenW, realScreenH, roomTableContainer);
         tabVisual = TabVisual.build(ctx, prefs, authManager, radar, realScreenW, realScreenH);
 
         FrameLayout.LayoutParams flp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
@@ -377,12 +384,20 @@ public class OverlayView extends LinearLayout {
     }
 
     public void onRemoteConfigUpdated() {
+        com.overlay.auth.FeatureManager.clearCache();
         refreshAllUI();
         NativeSender.sendConfigToCpp(prefs, authManager, realScreenW, realScreenH);
     }
 
-    private void showCollapsed() { panel.setVisibility(GONE); tvPill.setVisibility(VISIBLE); }
-    private void showExpanded()  { tvPill.setVisibility(GONE); panel.setVisibility(VISIBLE); }
+    private void showCollapsed() {
+        panel.setVisibility(GONE);
+        tvPill.setVisibility(VISIBLE);
+    }
+
+    private void showExpanded() {
+        tvPill.setVisibility(GONE);
+        panel.setVisibility(VISIBLE);
+    }
 
     private String formatTime(long seconds) {
         if (seconds <= 0) return "Expired";
@@ -391,18 +406,19 @@ public class OverlayView extends LinearLayout {
         return (seconds / 60) + " Minute";
     }
 
+    // ==================== VIP DIALOG ====================
     private void showVipUpgradeDialog() {
         final boolean isVip = prefs.getBoolean("is_vip_user", false);
         String deviceId = authManager.getDeviceId();
         String statusText = isVip ? "🌟 VIP ACTIVE" : "🔓 FREE USER";
-        
+
         String[] items;
         if (isVip) {
             items = new String[]{"Status: " + statusText, "Device ID: " + deviceId, "✅ Already VIP", "📋 Copy Device ID"};
         } else {
             items = new String[]{"Status: " + statusText, "Device ID: " + deviceId, "🔍 Check Upgrade", "📋 Copy Device ID"};
         }
-        
+
         showModernDialog("VIP STATUS", items, selected -> {
             if (selected.contains("Copy Device ID")) {
                 android.content.ClipboardManager cm = (android.content.ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
@@ -427,7 +443,7 @@ public class OverlayView extends LinearLayout {
             return;
         }
         prefs.edit().putLong("last_vip_check", now).apply();
-        
+
         Toast.makeText(getContext(), "Checking VIP status...", Toast.LENGTH_SHORT).show();
         authManager.fetchRemoteConfig(prefs, () -> {
             onRemoteConfigUpdated();
@@ -441,32 +457,35 @@ public class OverlayView extends LinearLayout {
         });
     }
 
+    // ==================== DRAG LISTENER ====================
     private final OnTouchListener dragL = new OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent e) {
             boolean locked = prefs.getBoolean("ui_lock", false);
             switch (e.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    tx = e.getRawX(); ty = e.getRawY();
-                    ix = lp.x;       iy = lp.y;
+                    tx = e.getRawX();
+                    ty = e.getRawY();
+                    ix = lp.x;
+                    iy = lp.y;
                     dragging = false;
                     fetchRealScreenSize();
                     return true;
                 case MotionEvent.ACTION_MOVE:
                     if (locked) return true;
-                    int dx = (int)(e.getRawX() - tx);
-                    int dy = (int)(e.getRawY() - ty);
+                    int dx = (int) (e.getRawX() - tx);
+                    int dy = (int) (e.getRawY() - ty);
                     if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
                         dragging = true;
                         int viewW = getWidth();
                         int viewH = getHeight();
                         float scale = prefs.getFloat("ui_scale", 1.0f);
-                        int scaledW = (int)(viewW * scale);
-                        int scaledH = (int)(viewH * scale);
-                        
+                        int scaledW = (int) (viewW * scale);
+                        int scaledH = (int) (viewH * scale);
+
                         int maxX = realScreenW - (v == tvPill ? viewW : scaledW);
                         int maxY = realScreenH - (v == tvPill ? viewH : scaledH);
-                        
+
                         lp.x = Math.max(0, Math.min(ix + dx, maxX));
                         lp.y = Math.max(0, Math.min(iy + dy, maxY));
                         wm.updateViewLayout(OverlayView.this, lp);
@@ -481,6 +500,7 @@ public class OverlayView extends LinearLayout {
         }
     };
 
+    // ==================== DIALOG ====================
     public interface DialogCallback {
         void onSelect(String item);
     }
@@ -489,7 +509,9 @@ public class OverlayView extends LinearLayout {
         Context ctx = getContext();
         FrameLayout dimBg = new FrameLayout(ctx);
         dimBg.setBackgroundColor(Color.argb(180, 0, 0, 0));
-        dimBg.setOnClickListener(v -> { try { wm.removeView(dimBg); } catch (Exception ignored) {} });
+        dimBg.setOnClickListener(v -> {
+            try { wm.removeView(dimBg); } catch (Exception ignored) {}
+        });
 
         LinearLayout card = new LinearLayout(ctx);
         card.setOrientation(VERTICAL);
@@ -502,8 +524,11 @@ public class OverlayView extends LinearLayout {
         card.setOnClickListener(v -> {});
 
         TextView tvT = new TextView(ctx);
-        tvT.setText(title); tvT.setTextColor(UIFactory.C_ACCENT); tvT.setTextSize(14f);
-        tvT.setTypeface(null, Typeface.BOLD); tvT.setGravity(Gravity.CENTER);
+        tvT.setText(title);
+        tvT.setTextColor(UIFactory.C_ACCENT);
+        tvT.setTextSize(14f);
+        tvT.setTypeface(null, Typeface.BOLD);
+        tvT.setGravity(Gravity.CENTER);
         tvT.setPadding(0, 0, 0, UIFactory.dp(ctx, 16));
         card.addView(tvT);
 
@@ -514,7 +539,9 @@ public class OverlayView extends LinearLayout {
 
         for (String item : items) {
             TextView btn = new TextView(ctx);
-            btn.setText(item); btn.setTextColor(UIFactory.C_TEXT); btn.setTextSize(12.5f);
+            btn.setText(item);
+            btn.setTextColor(UIFactory.C_TEXT);
+            btn.setTextSize(12.5f);
             btn.setPadding(UIFactory.dp(ctx, 12), UIFactory.dp(ctx, 12), UIFactory.dp(ctx, 12), UIFactory.dp(ctx, 12));
             btn.setGravity(Gravity.CENTER);
             btn.setTypeface(null, Typeface.BOLD);
@@ -560,15 +587,16 @@ public class OverlayView extends LinearLayout {
         }
     }
 
+    // ==================== ROOM SOCKET ====================
     private void startRoomSocketThread() {
         new Thread(() -> {
             while (isRoomSocketRunning) {
                 android.net.LocalSocket socket = null;
-                java.io.DataInputStream dis = null;
+                DataInputStream dis = null;
                 try {
                     socket = new android.net.LocalSocket();
                     socket.connect(new android.net.LocalSocketAddress("and.sys.sensor.data", android.net.LocalSocketAddress.Namespace.ABSTRACT));
-                    dis = new java.io.DataInputStream(socket.getInputStream());
+                    dis = new DataInputStream(socket.getInputStream());
 
                     byte[] countBuf = new byte[4];
                     byte[] packetBuf = new byte[80];
@@ -576,20 +604,21 @@ public class OverlayView extends LinearLayout {
 
                     while (isRoomSocketRunning) {
                         dis.readFully(countBuf);
-                        int count = java.nio.ByteBuffer.wrap(countBuf).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+                        int count = ByteBuffer.wrap(countBuf).order(ByteOrder.LITTLE_ENDIAN).getInt();
                         
                         if (count < 0 || count > 20) {
                             break; 
                         }
 
-                        final java.util.List<RoomPlayerData> players = new java.util.ArrayList<>();
+                        final List<RoomPlayerData> players = new ArrayList<>();
                         boolean isEnabled = prefs.getBoolean("room_info_enable", false);
 
                         for (int i = 0; i < count; i++) {
                             dis.readFully(packetBuf);
+                            
                             if (!isEnabled) continue;
 
-                            java.nio.ByteBuffer bb = java.nio.ByteBuffer.wrap(packetBuf).order(java.nio.ByteOrder.LITTLE_ENDIAN);
+                            ByteBuffer bb = ByteBuffer.wrap(packetBuf).order(ByteOrder.LITTLE_ENDIAN);
                             RoomPlayerData p = new RoomPlayerData();
                             p.camp = bb.getInt();
                             p.uid = bb.getInt();
@@ -607,6 +636,7 @@ public class OverlayView extends LinearLayout {
                             byte[] nameBytes = new byte[32];
                             bb.get(nameBytes);
                             p.name = new String(nameBytes).trim();
+                            
                             players.add(p);
                         }
 
@@ -619,7 +649,7 @@ public class OverlayView extends LinearLayout {
                                 roomTableContainer.removeAllViews();
                                 
                                 if (!isEnabled) {
-                                    android.widget.TextView tv = new android.widget.TextView(getContext());
+                                    TextView tv = new TextView(getContext());
                                     tv.setText("Room Info is Disabled. Turn on to view.");
                                     tv.setTextColor(UIFactory.C_SUBTEXT);
                                     tv.setTextSize(12f);
@@ -628,7 +658,7 @@ public class OverlayView extends LinearLayout {
                                 }
 
                                 if (players.isEmpty()) {
-                                    android.widget.TextView tv = new android.widget.TextView(getContext());
+                                    TextView tv = new TextView(getContext());
                                     tv.setText("Waiting data...");
                                     tv.setTextColor(UIFactory.C_ACCENT);
                                     tv.setTextSize(12f);
@@ -636,25 +666,32 @@ public class OverlayView extends LinearLayout {
                                     return;
                                 }
 
-                                java.util.List<RoomPlayerData> allyTeam = new java.util.ArrayList<>();
-                                java.util.List<RoomPlayerData> enemyTeam = new java.util.ArrayList<>();
+                                List<RoomPlayerData> allyTeam = new ArrayList<>();
+                                List<RoomPlayerData> enemyTeam = new ArrayList<>();
 
                                 int myCamp = players.get(0).camp; 
+
                                 for (RoomPlayerData p : players) {
                                     if (p.camp == myCamp) allyTeam.add(p);
                                     else enemyTeam.add(p);
                                 }
 
                                 if (!allyTeam.isEmpty()) {
-                                    roomTableContainer.addView(createTeamLabel(getContext(), "ALLY TEAM", android.graphics.Color.parseColor("#42A5F5")));
-                                    for (RoomPlayerData p : allyTeam) roomTableContainer.addView(createPlayerCard(p));
+                                    roomTableContainer.addView(createTeamLabel(getContext(), "ALLY TEAM", Color.parseColor("#42A5F5")));
+                                    for (RoomPlayerData p : allyTeam) {
+                                        roomTableContainer.addView(createPlayerCard(p));
+                                    }
                                 }
+
                                 if (!allyTeam.isEmpty() && !enemyTeam.isEmpty()) {
                                     roomTableContainer.addView(createVSDivider(getContext()));
                                 }
+
                                 if (!enemyTeam.isEmpty()) {
-                                    roomTableContainer.addView(createTeamLabel(getContext(), "ENEMY TEAM", android.graphics.Color.parseColor("#EF5350")));
-                                    for (RoomPlayerData p : enemyTeam) roomTableContainer.addView(createPlayerCard(p));
+                                    roomTableContainer.addView(createTeamLabel(getContext(), "ENEMY TEAM", Color.parseColor("#EF5350")));
+                                    for (RoomPlayerData p : enemyTeam) {
+                                        roomTableContainer.addView(createPlayerCard(p));
+                                    }
                                 }
                             });
                         }
@@ -668,21 +705,16 @@ public class OverlayView extends LinearLayout {
             }
         }).start();
     }
-    // ==========================================
-    // KUMPULAN FUNGSI ROOM INFO YANG DIHAPUS AI
-    // ==========================================
 
     private View createTeamLabel(Context ctx, String text, int color) {
-        android.widget.TextView tv = new android.widget.TextView(ctx);
+        TextView tv = new TextView(ctx);
         tv.setText(text);
         tv.setTextColor(color);
         tv.setTextSize(11f);
-        tv.setTypeface(null, android.graphics.Typeface.BOLD);
+        tv.setTypeface(null, Typeface.BOLD);
         tv.setLetterSpacing(0.1f);
         
-        android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
-                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 
-                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+        LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         lp.setMargins(UIFactory.dp(ctx, 4), UIFactory.dp(ctx, 4), 0, UIFactory.dp(ctx, 8));
         tv.setLayoutParams(lp);
         
@@ -690,30 +722,28 @@ public class OverlayView extends LinearLayout {
     }
 
     private View createVSDivider(Context ctx) {
-        android.widget.LinearLayout container = new android.widget.LinearLayout(ctx);
-        container.setOrientation(android.widget.LinearLayout.HORIZONTAL);
-        container.setGravity(android.view.Gravity.CENTER);
+        LinearLayout container = new LinearLayout(ctx);
+        container.setOrientation(HORIZONTAL);
+        container.setGravity(Gravity.CENTER);
         
-        android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
-                android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 
-                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+        LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         lp.setMargins(0, UIFactory.dp(ctx, 4), 0, UIFactory.dp(ctx, 12));
         container.setLayoutParams(lp);
 
         View lineLeft = new View(ctx);
-        lineLeft.setBackgroundColor(android.graphics.Color.argb(80, 255, 255, 255));
-        lineLeft.setLayoutParams(new android.widget.LinearLayout.LayoutParams(0, UIFactory.dp(ctx, 1), 1f));
+        lineLeft.setBackgroundColor(Color.argb(80, 255, 255, 255));
+        lineLeft.setLayoutParams(new LayoutParams(0, UIFactory.dp(ctx, 1), 1f));
 
-        android.widget.TextView tvVs = new android.widget.TextView(ctx);
+        TextView tvVs = new TextView(ctx);
         tvVs.setText(" VS ");
         tvVs.setTextColor(UIFactory.C_SUBTEXT);
         tvVs.setTextSize(10f);
-        tvVs.setTypeface(null, android.graphics.Typeface.BOLD_ITALIC);
+        tvVs.setTypeface(null, Typeface.BOLD_ITALIC);
         tvVs.setPadding(UIFactory.dp(ctx, 8), 0, UIFactory.dp(ctx, 8), 0);
 
         View lineRight = new View(ctx);
-        lineRight.setBackgroundColor(android.graphics.Color.argb(80, 255, 255, 255));
-        lineRight.setLayoutParams(new android.widget.LinearLayout.LayoutParams(0, UIFactory.dp(ctx, 1), 1f));
+        lineRight.setBackgroundColor(Color.argb(80, 255, 255, 255));
+        lineRight.setLayoutParams(new LayoutParams(0, UIFactory.dp(ctx, 1), 1f));
 
         container.addView(lineLeft);
         container.addView(tvVs);
@@ -724,44 +754,40 @@ public class OverlayView extends LinearLayout {
 
     private View createPlayerCard(RoomPlayerData p) {
         Context ctx = getContext();
-        android.widget.LinearLayout card = new android.widget.LinearLayout(ctx);
-        card.setOrientation(android.widget.LinearLayout.HORIZONTAL);
-        card.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        LinearLayout card = new LinearLayout(ctx);
+        card.setOrientation(HORIZONTAL);
+        card.setGravity(Gravity.CENTER_VERTICAL);
         card.setPadding(UIFactory.dp(ctx, 8), UIFactory.dp(ctx, 8), UIFactory.dp(ctx, 8), UIFactory.dp(ctx, 8));
         
-        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+        GradientDrawable bg = new GradientDrawable();
         if (p.camp == 1) {
-            bg.setColor(android.graphics.Color.parseColor("#102030"));
-            bg.setStroke(UIFactory.dp(ctx, 1), android.graphics.Color.parseColor("#1565C0")); 
+            bg.setColor(Color.parseColor("#102030"));
+            bg.setStroke(UIFactory.dp(ctx, 1), Color.parseColor("#1565C0")); 
         } else {
-            bg.setColor(android.graphics.Color.parseColor("#301010"));
-            bg.setStroke(UIFactory.dp(ctx, 1), android.graphics.Color.parseColor("#C62828")); 
+            bg.setColor(Color.parseColor("#301010"));
+            bg.setStroke(UIFactory.dp(ctx, 1), Color.parseColor("#C62828")); 
         }
         bg.setCornerRadius(UIFactory.dp(ctx, 8));
         card.setBackground(bg);
         
-        android.widget.LinearLayout.LayoutParams cardLp = new android.widget.LinearLayout.LayoutParams(
-                android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 
-                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+        LayoutParams cardLp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         cardLp.setMargins(0, 0, 0, UIFactory.dp(ctx, 6));
         card.setLayoutParams(cardLp);
 
-        android.widget.LinearLayout colLeft = new android.widget.LinearLayout(ctx);
-        colLeft.setOrientation(android.widget.LinearLayout.HORIZONTAL);
-        colLeft.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        colLeft.setLayoutParams(new android.widget.LinearLayout.LayoutParams(UIFactory.dp(ctx, 80), android.widget.LinearLayout.LayoutParams.WRAP_CONTENT));
+        LinearLayout colLeft = new LinearLayout(ctx);
+        colLeft.setOrientation(HORIZONTAL);
+        colLeft.setGravity(Gravity.CENTER_VERTICAL);
+        colLeft.setLayoutParams(new LayoutParams(UIFactory.dp(ctx, 80), LayoutParams.WRAP_CONTENT));
         
-        android.widget.FrameLayout heroContainer = new android.widget.FrameLayout(ctx);
-        heroContainer.setLayoutParams(new android.widget.LinearLayout.LayoutParams(UIFactory.dp(ctx, 36), UIFactory.dp(ctx, 36)));
+        FrameLayout heroContainer = new FrameLayout(ctx);
+        heroContainer.setLayoutParams(new LayoutParams(UIFactory.dp(ctx, 36), UIFactory.dp(ctx, 36)));
 
         android.widget.ImageView ivHero = new android.widget.ImageView(ctx);
-        ivHero.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
-                android.widget.FrameLayout.LayoutParams.MATCH_PARENT, 
-                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+        ivHero.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         ivHero.setScaleType(android.widget.ImageView.ScaleType.FIT_XY);
         
         String heroFileName = getHeroNameStr(p.heroId); 
-        android.graphics.Bitmap heroBmp = radar.getRawIcon(heroFileName);
+        Bitmap heroBmp = radar.getRawIcon(heroFileName);
 
         if (heroBmp == null && p.name != null) {
             heroBmp = radar.getRawIcon(p.name.toLowerCase().replaceAll("[^a-z0-9]", ""));
@@ -771,69 +797,63 @@ public class OverlayView extends LinearLayout {
             ivHero.setImageBitmap(heroBmp);
             heroContainer.addView(ivHero);
         } else {
-            ivHero.setBackgroundColor(android.graphics.Color.parseColor("#444444"));
+            ivHero.setBackgroundColor(Color.parseColor("#444444"));
             heroContainer.addView(ivHero);
             
-            android.widget.TextView tvHeroId = new android.widget.TextView(ctx);
+            TextView tvHeroId = new TextView(ctx);
             tvHeroId.setText(String.valueOf(p.heroId));
-            tvHeroId.setTextColor(android.graphics.Color.WHITE);
+            tvHeroId.setTextColor(Color.WHITE);
             tvHeroId.setTextSize(9f);
-            tvHeroId.setGravity(android.view.Gravity.CENTER);
-            tvHeroId.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
-                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT, 
-                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+            tvHeroId.setGravity(Gravity.CENTER);
+            tvHeroId.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
             heroContainer.addView(tvHeroId);
         }
         
-        android.widget.FrameLayout spellContainer = new android.widget.FrameLayout(ctx);
-        android.widget.LinearLayout.LayoutParams spellLp = new android.widget.LinearLayout.LayoutParams(UIFactory.dp(ctx, 22), UIFactory.dp(ctx, 22));
+        FrameLayout spellContainer = new FrameLayout(ctx);
+        LayoutParams spellLp = new LayoutParams(UIFactory.dp(ctx, 22), UIFactory.dp(ctx, 22));
         spellLp.setMargins(UIFactory.dp(ctx, 6), 0, 0, 0); 
         spellContainer.setLayoutParams(spellLp);
 
         android.widget.ImageView ivSpell = new android.widget.ImageView(ctx);
-        ivSpell.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
-                android.widget.FrameLayout.LayoutParams.MATCH_PARENT, 
-                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+        ivSpell.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         ivSpell.setScaleType(android.widget.ImageView.ScaleType.FIT_XY);
         
         String spellFileName = getSpellNameStr(p.spellId);
-        android.graphics.Bitmap spellBmp = radar.getRawIcon(spellFileName);
+        Bitmap spellBmp = radar.getRawIcon(spellFileName);
         
         if (spellBmp != null) {
             ivSpell.setImageBitmap(spellBmp);
             spellContainer.addView(ivSpell);
         } else {
-            ivSpell.setBackgroundColor(android.graphics.Color.parseColor("#444444"));
+            ivSpell.setBackgroundColor(Color.parseColor("#444444"));
             spellContainer.addView(ivSpell);
             
-            android.widget.TextView tvSpellId = new android.widget.TextView(ctx);
+            TextView tvSpellId = new TextView(ctx);
             tvSpellId.setText(String.valueOf(p.spellId)); 
-            tvSpellId.setTextColor(android.graphics.Color.WHITE);
+            tvSpellId.setTextColor(Color.WHITE);
             tvSpellId.setTextSize(6f);
-            tvSpellId.setGravity(android.view.Gravity.CENTER);
-            tvSpellId.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
-                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT, 
-                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+            tvSpellId.setGravity(Gravity.CENTER);
+            tvSpellId.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
             spellContainer.addView(tvSpellId);
         }
 
         colLeft.addView(heroContainer);
         colLeft.addView(spellContainer);
 
-        android.widget.LinearLayout colMid = new android.widget.LinearLayout(ctx);
-        colMid.setOrientation(android.widget.LinearLayout.VERTICAL);
-        colMid.setLayoutParams(new android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+        LinearLayout colMid = new LinearLayout(ctx);
+        colMid.setOrientation(VERTICAL);
+        colMid.setLayoutParams(new LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f));
         
-        android.widget.TextView tvName = new android.widget.TextView(ctx);
+        TextView tvName = new TextView(ctx);
         String leaderIcon = p.isLeader ? "👑 " : "";
         tvName.setText(leaderIcon + p.name);
         tvName.setTextColor(UIFactory.C_TEXT);
         tvName.setTextSize(12f);
-        tvName.setTypeface(null, android.graphics.Typeface.BOLD);
+        tvName.setTypeface(null, Typeface.BOLD);
         tvName.setSingleLine(true);
         tvName.setEllipsize(android.text.TextUtils.TruncateAt.END); 
 
-        android.widget.TextView tvUid = new android.widget.TextView(ctx);
+        TextView tvUid = new TextView(ctx);
         tvUid.setText("UID: " + p.uid + " | Lv." + p.accLv);
         tvUid.setTextColor(UIFactory.C_SUBTEXT);
         tvUid.setTextSize(9.5f);
@@ -841,31 +861,29 @@ public class OverlayView extends LinearLayout {
         colMid.addView(tvName);
         colMid.addView(tvUid);
 
-        android.widget.LinearLayout colRight = new android.widget.LinearLayout(ctx);
-        colRight.setOrientation(android.widget.LinearLayout.VERTICAL);
-        colRight.setGravity(android.view.Gravity.END);
+        LinearLayout colRight = new LinearLayout(ctx);
+        colRight.setOrientation(VERTICAL);
+        colRight.setGravity(Gravity.END);
         
-        android.widget.LinearLayout.LayoutParams rightLp = new android.widget.LinearLayout.LayoutParams(
-                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 
-                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+        LayoutParams rightLp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         rightLp.setMargins(UIFactory.dp(ctx, 10), 0, UIFactory.dp(ctx, 5), 0); 
         colRight.setLayoutParams(rightLp);
         
-        android.widget.TextView tvRank = new android.widget.TextView(ctx);
+        TextView tvRank = new TextView(ctx);
         tvRank.setText(getRankName(p.rank, p.mythPt));
-        tvRank.setTextColor(android.graphics.Color.parseColor("#FFD700"));
+        tvRank.setTextColor(Color.parseColor("#FFD700"));
         tvRank.setTextSize(10f);
-        tvRank.setTypeface(null, android.graphics.Typeface.BOLD);
+        tvRank.setTypeface(null, Typeface.BOLD);
 
         float wr = (p.matches > 0) ? ((float)p.wins / p.matches * 100f) : 0f;
-        android.widget.TextView tvWr = new android.widget.TextView(ctx);
+        TextView tvWr = new TextView(ctx);
         tvWr.setText(String.format("%.1f%% (%d M)", wr, p.matches));
         tvWr.setTextSize(10.5f);
         
-        if (wr >= 65.0f && p.matches >= 20) tvWr.setTextColor(android.graphics.Color.parseColor("#00E676")); 
-        else if (wr >= 50.0f) tvWr.setTextColor(android.graphics.Color.parseColor("#FFA726")); 
-        else if (wr > 0f && p.matches >= 10) tvWr.setTextColor(android.graphics.Color.parseColor("#EF5350")); 
-        else tvWr.setTextColor(android.graphics.Color.LTGRAY); 
+        if (wr >= 65.0f && p.matches >= 20) tvWr.setTextColor(Color.parseColor("#00E676")); 
+        else if (wr >= 50.0f) tvWr.setTextColor(Color.parseColor("#FFA726")); 
+        else if (wr > 0f && p.matches >= 10) tvWr.setTextColor(Color.parseColor("#EF5350")); 
+        else tvWr.setTextColor(Color.LTGRAY); 
 
         colRight.addView(tvRank);
         colRight.addView(tvWr);
