@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.google.android.ext'
+    namespace 'com.overlay'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.google.android.ext"
+        applicationId "com.overlay"
         minSdk 21
         targetSdk 33
         versionCode 1

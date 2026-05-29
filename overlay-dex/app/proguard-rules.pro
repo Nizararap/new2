@@ -20,7 +20,7 @@
 
 # 5. Entry Points (Hanya keep yang benar-benar perlu dipanggil dari luar/smali)
 # Kita perlu keep nama class Service agar bisa dipanggil via Intent di inject.smali
--keep class com.google.android.ext.OverlayService {
+-keep class com.overlay.OverlayService {
     public <init>();
     public void onCreate();
     public int onStartCommand(android.content.Intent, int, int);
@@ -28,13 +28,13 @@
 }
 
 # Keep method yang dipanggil secara refleksi atau dari native jika ada
--keepclassmembers class com.google.android.ext.KeyAuthManager {
+-keepclassmembers class com.overlay.KeyAuthManager {
     public boolean isKeyValid();
-    public void validateKey(java.lang.String, com.google.android.ext.KeyAuthManager$AuthCallback);
+    public void validateKey(java.lang.String, com.overlay.KeyAuthManager$AuthCallback);
 }
 
 # Keep interface callback agar tidak hilang
--keep interface com.google.android.ext.KeyAuthManager$AuthCallback { *; }
+-keep interface com.overlay.KeyAuthManager$AuthCallback { *; }
 
 # Buang semua log untuk keamanan
 -assumenosideeffects class android.util.Log {

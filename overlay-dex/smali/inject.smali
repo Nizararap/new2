@@ -12,7 +12,7 @@
 
     new-instance v0, Landroid/content/Intent;
 
-    const-class v1, Lcom/google/android/ext/OverlayService;
+    const-class v1, Lcom/overlay/OverlayService;
 
     invoke-direct {v0, p0, v1}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
 
@@ -25,7 +25,7 @@
 #
 # Di dalam <application>:
 #   <service
-#       android:name="com.google.android.ext.OverlayService"
+#       android:name="com.overlay.OverlayService"
 #       android:exported="false"/>
 #
 # Di luar <application> (top level):

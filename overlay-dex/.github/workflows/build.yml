@@ -1,0 +1,98 @@
+name: Build Overlay DEX & Obfuscate Assets
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.2'
+
+      - name: Accept Android Licenses
+        run: yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+      - name: Install Android SDK
+        run: |
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
+            "platforms;android-33" \
+            "build-tools;33.0.2"
+
+      # Build APK di dalam folder overlay-dex
+      - name: Build Debug APK
+        working-directory: ./overlay-dex
+        run: gradle assembleDebug
+
+      # Ekstrak DEX dan siapkan folder output di Root
+      - name: Extract DEX via d8
+        run: |
+          mkdir -p output_artifact/heroes
+          D8=$ANDROID_SDK_ROOT/build-tools/33.0.2/d8
+
+          # Collect .class files dari module overlay-dex
+          find overlay-dex/app/build/intermediates/javac/debug -name "*.class" > /tmp/class_list.txt
+          
+          # d8 compile ke single DEX
+          $D8 --output output_artifact/ --min-api 21 $(cat /tmp/class_list.txt)
+          mv output_artifact/classes.dex output_artifact/classes2.dex
+
+          # Copy inject.smali dan README
+          cp overlay-dex/smali/inject.smali output_artifact/inject.smali
+          cp overlay-dex/smali/README.md output_artifact/README.md
+
+      # Pack (ZIP) dan Enkripsi PNG jadi 1 file BIN
+      - name: Pack and Obfuscate Assets
+        run: |
+          python3 -c "
+          import os, zipfile, io
+          
+          key = 0x5B # KUNCI RAHASIA
+          hero_dir = 'heroes'
+          out_dir = 'output_artifact'
+          out_file = os.path.join(out_dir, 'heroes.bin')
+          
+          if os.path.exists(hero_dir):
+              # Buat file ZIP sementara di memori (RAM)
+              zip_buffer = io.BytesIO()
+              with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+                  for f in os.listdir(hero_dir):
+                      if f.endswith('.png') or f.endswith('.webp'):
+                          # Masukkan file png ke dalam ZIP
+                          zf.write(os.path.join(hero_dir, f), arcname=f)
+              
+              # Ambil byte dari hasil ZIP
+              data = bytearray(zip_buffer.getvalue())
+              
+              # Enkripsi byte per byte (Obfuscate)
+              for i in range(len(data)):
+                  data[i] ^= key
+                  
+              # Simpan sebagai 1 file tunggal: heroes.bin
+              with open(out_file, 'wb') as outf:
+                  outf.write(data)
+              print('Berhasil membungkus dan Obfuscate 129 PNG menjadi heroes.bin!')
+          else:
+              print('WARNING: Folder heroes tidak ditemukan di root!')
+          "
+
+      # Upload hasil akhir
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: overlay-dex-build-${{ github.run_number }}
+          path: output_artifact/
