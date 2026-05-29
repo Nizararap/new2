@@ -668,4 +668,321 @@ public class OverlayView extends LinearLayout {
             }
         }).start();
     }
+    // ==========================================
+    // KUMPULAN FUNGSI ROOM INFO YANG DIHAPUS AI
+    // ==========================================
+
+    private View createTeamLabel(Context ctx, String text, int color) {
+        android.widget.TextView tv = new android.widget.TextView(ctx);
+        tv.setText(text);
+        tv.setTextColor(color);
+        tv.setTextSize(11f);
+        tv.setTypeface(null, android.graphics.Typeface.BOLD);
+        tv.setLetterSpacing(0.1f);
+        
+        android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(UIFactory.dp(ctx, 4), UIFactory.dp(ctx, 4), 0, UIFactory.dp(ctx, 8));
+        tv.setLayoutParams(lp);
+        
+        return tv;
+    }
+
+    private View createVSDivider(Context ctx) {
+        android.widget.LinearLayout container = new android.widget.LinearLayout(ctx);
+        container.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+        container.setGravity(android.view.Gravity.CENTER);
+        
+        android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, UIFactory.dp(ctx, 4), 0, UIFactory.dp(ctx, 12));
+        container.setLayoutParams(lp);
+
+        View lineLeft = new View(ctx);
+        lineLeft.setBackgroundColor(android.graphics.Color.argb(80, 255, 255, 255));
+        lineLeft.setLayoutParams(new android.widget.LinearLayout.LayoutParams(0, UIFactory.dp(ctx, 1), 1f));
+
+        android.widget.TextView tvVs = new android.widget.TextView(ctx);
+        tvVs.setText(" VS ");
+        tvVs.setTextColor(UIFactory.C_SUBTEXT);
+        tvVs.setTextSize(10f);
+        tvVs.setTypeface(null, android.graphics.Typeface.BOLD_ITALIC);
+        tvVs.setPadding(UIFactory.dp(ctx, 8), 0, UIFactory.dp(ctx, 8), 0);
+
+        View lineRight = new View(ctx);
+        lineRight.setBackgroundColor(android.graphics.Color.argb(80, 255, 255, 255));
+        lineRight.setLayoutParams(new android.widget.LinearLayout.LayoutParams(0, UIFactory.dp(ctx, 1), 1f));
+
+        container.addView(lineLeft);
+        container.addView(tvVs);
+        container.addView(lineRight);
+
+        return container;
+    }
+
+    private View createPlayerCard(RoomPlayerData p) {
+        Context ctx = getContext();
+        android.widget.LinearLayout card = new android.widget.LinearLayout(ctx);
+        card.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+        card.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        card.setPadding(UIFactory.dp(ctx, 8), UIFactory.dp(ctx, 8), UIFactory.dp(ctx, 8), UIFactory.dp(ctx, 8));
+        
+        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+        if (p.camp == 1) {
+            bg.setColor(android.graphics.Color.parseColor("#102030"));
+            bg.setStroke(UIFactory.dp(ctx, 1), android.graphics.Color.parseColor("#1565C0")); 
+        } else {
+            bg.setColor(android.graphics.Color.parseColor("#301010"));
+            bg.setStroke(UIFactory.dp(ctx, 1), android.graphics.Color.parseColor("#C62828")); 
+        }
+        bg.setCornerRadius(UIFactory.dp(ctx, 8));
+        card.setBackground(bg);
+        
+        android.widget.LinearLayout.LayoutParams cardLp = new android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+        cardLp.setMargins(0, 0, 0, UIFactory.dp(ctx, 6));
+        card.setLayoutParams(cardLp);
+
+        android.widget.LinearLayout colLeft = new android.widget.LinearLayout(ctx);
+        colLeft.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+        colLeft.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        colLeft.setLayoutParams(new android.widget.LinearLayout.LayoutParams(UIFactory.dp(ctx, 80), android.widget.LinearLayout.LayoutParams.WRAP_CONTENT));
+        
+        android.widget.FrameLayout heroContainer = new android.widget.FrameLayout(ctx);
+        heroContainer.setLayoutParams(new android.widget.LinearLayout.LayoutParams(UIFactory.dp(ctx, 36), UIFactory.dp(ctx, 36)));
+
+        android.widget.ImageView ivHero = new android.widget.ImageView(ctx);
+        ivHero.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT, 
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+        ivHero.setScaleType(android.widget.ImageView.ScaleType.FIT_XY);
+        
+        String heroFileName = getHeroNameStr(p.heroId); 
+        android.graphics.Bitmap heroBmp = radar.getRawIcon(heroFileName);
+
+        if (heroBmp == null && p.name != null) {
+            heroBmp = radar.getRawIcon(p.name.toLowerCase().replaceAll("[^a-z0-9]", ""));
+        }
+
+        if (heroBmp != null) {
+            ivHero.setImageBitmap(heroBmp);
+            heroContainer.addView(ivHero);
+        } else {
+            ivHero.setBackgroundColor(android.graphics.Color.parseColor("#444444"));
+            heroContainer.addView(ivHero);
+            
+            android.widget.TextView tvHeroId = new android.widget.TextView(ctx);
+            tvHeroId.setText(String.valueOf(p.heroId));
+            tvHeroId.setTextColor(android.graphics.Color.WHITE);
+            tvHeroId.setTextSize(9f);
+            tvHeroId.setGravity(android.view.Gravity.CENTER);
+            tvHeroId.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT, 
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+            heroContainer.addView(tvHeroId);
+        }
+        
+        android.widget.FrameLayout spellContainer = new android.widget.FrameLayout(ctx);
+        android.widget.LinearLayout.LayoutParams spellLp = new android.widget.LinearLayout.LayoutParams(UIFactory.dp(ctx, 22), UIFactory.dp(ctx, 22));
+        spellLp.setMargins(UIFactory.dp(ctx, 6), 0, 0, 0); 
+        spellContainer.setLayoutParams(spellLp);
+
+        android.widget.ImageView ivSpell = new android.widget.ImageView(ctx);
+        ivSpell.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT, 
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+        ivSpell.setScaleType(android.widget.ImageView.ScaleType.FIT_XY);
+        
+        String spellFileName = getSpellNameStr(p.spellId);
+        android.graphics.Bitmap spellBmp = radar.getRawIcon(spellFileName);
+        
+        if (spellBmp != null) {
+            ivSpell.setImageBitmap(spellBmp);
+            spellContainer.addView(ivSpell);
+        } else {
+            ivSpell.setBackgroundColor(android.graphics.Color.parseColor("#444444"));
+            spellContainer.addView(ivSpell);
+            
+            android.widget.TextView tvSpellId = new android.widget.TextView(ctx);
+            tvSpellId.setText(String.valueOf(p.spellId)); 
+            tvSpellId.setTextColor(android.graphics.Color.WHITE);
+            tvSpellId.setTextSize(6f);
+            tvSpellId.setGravity(android.view.Gravity.CENTER);
+            tvSpellId.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT, 
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+            spellContainer.addView(tvSpellId);
+        }
+
+        colLeft.addView(heroContainer);
+        colLeft.addView(spellContainer);
+
+        android.widget.LinearLayout colMid = new android.widget.LinearLayout(ctx);
+        colMid.setOrientation(android.widget.LinearLayout.VERTICAL);
+        colMid.setLayoutParams(new android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+        
+        android.widget.TextView tvName = new android.widget.TextView(ctx);
+        String leaderIcon = p.isLeader ? "👑 " : "";
+        tvName.setText(leaderIcon + p.name);
+        tvName.setTextColor(UIFactory.C_TEXT);
+        tvName.setTextSize(12f);
+        tvName.setTypeface(null, android.graphics.Typeface.BOLD);
+        tvName.setSingleLine(true);
+        tvName.setEllipsize(android.text.TextUtils.TruncateAt.END); 
+
+        android.widget.TextView tvUid = new android.widget.TextView(ctx);
+        tvUid.setText("UID: " + p.uid + " | Lv." + p.accLv);
+        tvUid.setTextColor(UIFactory.C_SUBTEXT);
+        tvUid.setTextSize(9.5f);
+
+        colMid.addView(tvName);
+        colMid.addView(tvUid);
+
+        android.widget.LinearLayout colRight = new android.widget.LinearLayout(ctx);
+        colRight.setOrientation(android.widget.LinearLayout.VERTICAL);
+        colRight.setGravity(android.view.Gravity.END);
+        
+        android.widget.LinearLayout.LayoutParams rightLp = new android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+        rightLp.setMargins(UIFactory.dp(ctx, 10), 0, UIFactory.dp(ctx, 5), 0); 
+        colRight.setLayoutParams(rightLp);
+        
+        android.widget.TextView tvRank = new android.widget.TextView(ctx);
+        tvRank.setText(getRankName(p.rank, p.mythPt));
+        tvRank.setTextColor(android.graphics.Color.parseColor("#FFD700"));
+        tvRank.setTextSize(10f);
+        tvRank.setTypeface(null, android.graphics.Typeface.BOLD);
+
+        float wr = (p.matches > 0) ? ((float)p.wins / p.matches * 100f) : 0f;
+        android.widget.TextView tvWr = new android.widget.TextView(ctx);
+        tvWr.setText(String.format("%.1f%% (%d M)", wr, p.matches));
+        tvWr.setTextSize(10.5f);
+        
+        if (wr >= 65.0f && p.matches >= 20) tvWr.setTextColor(android.graphics.Color.parseColor("#00E676")); 
+        else if (wr >= 50.0f) tvWr.setTextColor(android.graphics.Color.parseColor("#FFA726")); 
+        else if (wr > 0f && p.matches >= 10) tvWr.setTextColor(android.graphics.Color.parseColor("#EF5350")); 
+        else tvWr.setTextColor(android.graphics.Color.LTGRAY); 
+
+        colRight.addView(tvRank);
+        colRight.addView(tvWr);
+
+        card.addView(colLeft);
+        card.addView(colMid);
+        card.addView(colRight);
+
+        return card;
+    }
+
+    private final String[] strRank = {
+        "Warrior III *1", "Warrior III *2", "Warrior III *3",
+        "Warrior II *0", "Warrior II *1", "Warrior II *2", "Warrior II *3",
+        "Warrior I *0", "Warrior I *1", "Warrior I *2", "Warrior I *3",
+        "Elite III *0", "Elite III *1", "Elite III *2", "Elite III *3", "Elite III *4",
+        "Elite II *0", "Elite II *1", "Elite II *2", "Elite II *3", "Elite II *4",
+        "Elite I *0", "Elite I *1", "Elite I *2", "Elite I *3", "Elite I *4",
+        "Master IV *0", "Master IV *1", "Master IV *2", "Master IV *3", "Master IV *4",
+        "Master III *0", "Master III *1", "Master III *2", "Master III *3", "Master III *4",
+        "Master II *0", "Master II *1", "Master II *2", "Master II *3", "Master II *4",
+        "Master I *0", "Master I *1", "Master I *2", "Master I *3", "Master I *4",
+        "Grandmaster V *0", "Grandmaster V *1", "Grandmaster V *2", "Grandmaster V *3", "Grandmaster V *4", "Grandmaster V *5",
+        "Grandmaster IV *0", "Grandmaster IV *1", "Grandmaster IV *2", "Grandmaster IV *3", "Grandmaster IV *4", "Grandmaster IV *5",
+        "Grandmaster III *0", "Grandmaster III *1", "Grandmaster III *2", "Grandmaster III *3", "Grandmaster III *4", "Grandmaster III *5",
+        "Grandmaster II *0", "Grandmaster II *1", "Grandmaster II *2", "Grandmaster II *3", "Grandmaster II *4", "Grandmaster II *5",
+        "Grandmaster I *0", "Grandmaster I *1", "Grandmaster I *2", "Grandmaster I *3", "Grandmaster I *4", "Grandmaster I *5",
+        "Epic V *0", "Epic V *1", "Epic V *2", "Epic V *3", "Epic V *4", "Epic V *5",
+        "Epic IV *0", "Epic IV *1", "Epic IV *2", "Epic IV *3", "Epic IV *4", "Epic IV *5",
+        "Epic III *0", "Epic III *1", "Epic III *2", "Epic III *3", "Epic III *4", "Epic III *5",
+        "Epic II *0", "Epic II *1", "Epic II *2", "Epic II *3", "Epic II *4", "Epic II *5",
+        "Epic I *0", "Epic I *1", "Epic I *2", "Epic I *3", "Epic I *4", "Epic I *5",
+        "Legend V *0", "Legend V *1", "Legend V *2", "Legend V *3", "Legend V *4", "Legend V *5",
+        "Legend IV *0", "Legend IV *1", "Legend IV *2", "Legend IV *3", "Legend IV *4", "Legend IV *5",
+        "Legend III *0", "Legend III *1", "Legend III *2", "Legend III *3", "Legend III *4", "Legend III *5",
+        "Legend II *0", "Legend II *1", "Legend II *2", "Legend II *3", "Legend II *4", "Legend II *5",
+        "Legend I *0", "Legend I *1", "Legend I *2", "Legend I *3", "Legend I *4", "Legend I *5"
+    };
+
+    private String getRankName(int rankLevel, int mythPoint) {
+        if (rankLevel <= 0) return "Unranked";
+        if (rankLevel < strRank.length) { 
+            return strRank[rankLevel];
+        } else {
+            int star = rankLevel - 136; 
+            if (star > 99) return "Immortal *" + star;
+            if (star > 49) return "Glory *" + star;
+            if (star > 24) return "Honor *" + star;
+            return "Mythic *" + star;
+        }
+    }
+
+    private String getSpellNameStr(int spellId) {
+        switch (spellId) {
+            case 20150: return "execute";
+            case 20020: return "retribution";
+            case 20030: return "inspire";
+            case 20040: return "sprint";
+            case 20050: return "revitalize";
+            case 20060: return "aegis";
+            case 20070: return "petrify";
+            case 20080: return "purify";
+            case 20100: return "flicker";
+            case 20140: return "flameshot";
+            case 20110: return "arrival";
+            case 20190: return "vengeance";
+            default: return "unknown_spell"; 
+        }
+    }
+
+    private String getHeroNameStr(int heroId) {
+        switch(heroId) {
+            case 1: return "miya"; case 2: return "balmond"; case 3: return "saber";
+            case 4: return "alice"; case 5: return "nana"; case 6: return "tigreal";
+            case 7: return "alucard"; case 8: return "karina"; case 9: return "akai";
+            case 10: return "franco"; case 11: return "bane"; case 12: return "bruno";
+            case 13: return "clint"; case 14: return "rafaela"; case 15: return "eudora";
+            case 16: return "zilong"; case 17: return "fanny"; case 18: return "layla";
+            case 19: return "minotaur"; case 20: return "lolita"; case 21: return "hayabusa";
+            case 22: return "freya"; case 23: return "gord"; case 24: return "natalia";
+            case 25: return "kagura"; case 26: return "chou"; case 27: return "sun";
+            case 28: return "alpha"; case 29: return "ruby"; case 30: return "yisunshin";
+            case 31: return "moskov"; case 32: return "johnson"; case 33: return "cyclops";
+            case 34: return "estes"; case 35: return "hilda"; case 36: return "aurora";
+            case 37: return "lapulapu"; case 38: return "vexana"; case 39: return "roger";
+            case 40: return "karrie"; case 41: return "gatotkaca"; case 42: return "harley";
+            case 43: return "irithel"; case 44: return "grock"; case 45: return "argus";
+            case 46: return "odette"; case 47: return "lancelot"; case 48: return "diggie";
+            case 49: return "hylos"; case 50: return "zhask"; case 51: return "helcurt";
+            case 52: return "pharsa"; case 53: return "lesley"; case 54: return "jawhead";
+            case 55: return "angela"; case 56: return "gusion"; case 57: return "valir";
+            case 58: return "martis"; case 59: return "uranus"; case 60: return "hanabi";
+            case 61: return "change"; case 62: return "kaja"; case 63: return "selena";
+            case 64: return "aldous"; case 65: return "claude"; case 66: return "vale";
+            case 67: return "leomord"; case 68: return "lunox"; case 69: return "hanzo";
+            case 70: return "belerick"; case 71: return "kimmy"; case 72: return "thamuz";
+            case 73: return "harith"; case 74: return "minsitthar"; case 75: return "kadita";
+            case 76: return "faramis"; case 77: return "badang"; case 78: return "khufra";
+            case 79: return "granger"; case 80: return "guinevere"; case 81: return "esmeralda";
+            case 82: return "terizla"; case 83: return "xborg"; case 84: return "ling";
+            case 85: return "dyrroth"; case 86: return "lylia"; case 87: return "baxia";
+            case 88: return "masha"; case 89: return "wanwan"; case 90: return "silvanna";
+            case 91: return "cecilion"; case 92: return "carmilla"; case 93: return "atlas";
+            case 94: return "popolandkupa"; case 95: return "yuzhong"; case 96: return "luoyi";
+            case 97: return "benedetta"; case 98: return "khaleed"; case 99: return "barats";
+            case 100: return "brody"; case 101: return "yve"; case 102: return "mathilda";
+            case 103: return "paquito"; case 104: return "gloo"; case 105: return "beatrix";
+            case 106: return "phoveus"; case 107: return "natan"; case 108: return "aulus";
+            case 109: return "aamon"; case 110: return "valentina"; case 111: return "edith";
+            case 112: return "floryn"; case 113: return "yin"; case 114: return "melissa";
+            case 115: return "xavier"; case 116: return "julian"; case 117: return "fredrinn";
+            case 118: return "joy"; case 119: return "novaria"; case 120: return "arlott";
+            case 121: return "ixia"; case 122: return "nolan"; case 123: return "cici";
+            case 124: return "chip"; case 125: return "zhuxin"; case 126: return "suyou";
+            case 127: return "lukas"; case 128: return "kalea"; case 129: return "zetian";
+            case 130: return "obsidia"; case 131: return "sora"; case 132: return "marcel";
+            default: return "unknown_hero";
+        }
+    }
 }
