@@ -42,4 +42,11 @@ public class FeatureManager {
             default: return prefKey;
         }
     }
+
+    // ===========================================
+    // INI METODE YANG HILANG DAN BIKIN ERROR
+    // ===========================================
+    public static void clearCache() {
+        lockCache.clear();
+    }
 }
