@@ -302,11 +302,78 @@ public class KeyAuthManager {
                     SharedPreferences.Editor editor = modPrefs.edit();
                     editor.putBoolean("is_vip_user", isVip);
                     java.util.Iterator<String> keys = features.keys();
-                    while (keys.hasNext()) {
-                        String key = keys.next();
-                        editor.putBoolean("remote_" + key, features.getBoolean(key));
-                    }
-                    editor.apply();
+while (keys.hasNext()) {
+    String key = keys.next();
+    editor.putBoolean("remote_" + key, features.getBoolean(key));
+}
+
+// === LOGIKA ORIGINAL: Jika bukan VIP, paksa matikan toggle sesuai remote flag ===
+if (!isVip) {
+    // Aimbot
+    if (features.has("aimbot") && !features.optBoolean("aimbot", true)) {
+        editor.putBoolean("aimbot_enable", false);
+    }
+    // Radar
+    if (features.has("radar") && !features.optBoolean("radar", true)) {
+        editor.putBoolean("radar_enable", false);
+    }
+    // Combo
+    if (features.has("combo") && !features.optBoolean("combo", true)) {
+        editor.putString("selected_combo", "none");
+    }
+    // ESP Circle
+    if (features.has("esp_circle") && !features.optBoolean("esp_circle", true)) {
+        editor.putBoolean("esp_circle", false);
+    }
+    // ESP Line
+    if (features.has("esp_line") && !features.optBoolean("esp_line", true)) {
+        editor.putBoolean("esp_line", false);
+    }
+    // ESP Health
+    if (features.has("esp_health") && !features.optBoolean("esp_health", true)) {
+        editor.putBoolean("esp_health", false);
+    }
+    // ESP Cooldown
+    if (features.has("esp_cooldown") && !features.optBoolean("esp_cooldown", true)) {
+        editor.putBoolean("esp_cooldown", false);
+    }
+    // ESP Monster
+    if (features.has("esp_monster") && !features.optBoolean("esp_monster", true)) {
+        editor.putBoolean("esp_monster", false);
+    }
+    // Alert Monster HP
+    if (features.has("alert_monster_hp") && !features.optBoolean("alert_monster_hp", true)) {
+        editor.putBoolean("alert_monster_hp", false);
+    }
+    // Alert Enemy Ulti
+    if (features.has("alert_enemy_ulti") && !features.optBoolean("alert_enemy_ulti", true)) {
+        editor.putBoolean("alert_enemy_ulti", false);
+    }
+    // Disable Shadows
+    if (features.has("disable_shadows") && !features.optBoolean("disable_shadows", true)) {
+        editor.putBoolean("disable_shadows", false);
+    }
+    // Disable AA
+    if (features.has("disable_aa") && !features.optBoolean("disable_aa", true)) {
+        editor.putBoolean("disable_aa", false);
+    }
+    // Ling mode
+    if (features.has("ling") && !features.optBoolean("ling", true)) {
+        editor.putInt("ling_mode", 0);
+    }
+    // Retribution semua
+    if (features.has("retribution") && !features.optBoolean("retribution", true)) {
+        editor.putBoolean("retri_buff", false);
+        editor.putBoolean("retri_lord", false);
+        editor.putBoolean("retri_turtle", false);
+        editor.putBoolean("retri_litho", false);
+    }
+    // Lock Hero
+    if (features.has("lock_hero") && !features.optBoolean("lock_hero", true)) {
+        editor.putBoolean("lock_hero_enable", false);
+    }
+}
+editor.apply();
                 }
             } catch (Exception e) { Log.e(TAG, "fetchRemoteConfig failed", e); }
             finally {
